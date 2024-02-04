@@ -1,0 +1,19 @@
+version: "3"
+
+services:
+  storage-users-postgres:
+    image: postgres
+    ports:
+      - 5433:5432
+    environment:
+      - POSTGRES_HOST=localhost
+      - POSTGRES_PORT=5433
+      - POSTGRES_USER=myusername
+      - POSTGRES_PASSWORD=mypassword
+      - POSTGRES_DB=grishachertila
+    volumes:
+      - postgres-grishachertila:/var/lib/postgresql/data
+
+volumes:
+  postgres-grishachertila:
+    external: false

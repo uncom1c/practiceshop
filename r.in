@@ -1,0 +1,15 @@
+fastapi
+uvicorn
+motor
+sqlalchemy
+alembic
+psycopg2-binary
+python-dotenv
+asyncpg
+pydantic[email]
+PyJWT
+fastapi_sqlalchemy
+python-jose[cryptography]
+passlib
+python-multipart
+bcrypt
