@@ -13,6 +13,9 @@ import os
 
 
 from api.router import router as api_router
+from api.auth.router import router as auth_router
+from api.search.router import router as search_router
+from api.shop.router import router as shop_router
 
 
 
@@ -43,3 +46,6 @@ app = FastAPI(lifespan=lifespan)
 
 
 app.include_router(router=api_router)
+app.include_router(router=auth_router,  prefix="/auth" , tags=["auth"])
+app.include_router(router=search_router,prefix="/search" , tags=["search"])
+app.include_router(router=shop_router,  prefix="/shop" ,  tags=["shop"])

@@ -1,11 +1,12 @@
 from datetime import timedelta, timezone, datetime
 from typing import Annotated
 from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError
 import jwt
 from db.schemas import (
     Item_addDB,
+    Token,
     UserCreate,
     TokenData,
     buy_form,
@@ -17,7 +18,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from db.models import user_table, item_table, order_table
 from config import JWT_ALGORITHM, JWT_SECRET, ACCESS_TOKEN_EXPIRE_MINUTES
 from passlib.context import CryptContext
-from sqlalchemy.exc import *
+from sqlalchemy.exc import *  
 import random
 
 # from api.dependencies import *
@@ -154,3 +155,54 @@ async def buy_service(
     await db.execute(query2)
     await db.commit()
     return order_create
+
+
+async def service_login_for_access_token(
+    form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+    db: AsyncSession = Depends(get_async_session),
+) -> Token:
+    result = await get_username(form_data.username, db)
+
+    if not result:
+        return "no such user"
+
+    if not verify_password(form_data.password, result["password"]):
+        return "wrong password"
+
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(
+        data={"sub": result["username"]}, expires_delta=access_token_expires
+    )
+    return Token(access_token=access_token, token_type="bearer")
+
+async def service_getuser_by_jwt(jwt_token, db: AsyncSession = Depends(get_async_session)):
+    try:
+        decoded_jwt = jwt.decode(
+            jwt_token,
+            JWT_SECRET,
+            JWT_ALGORITHM,
+        )
+        user_id = decoded_jwt["id"]
+    except jwt.exceptions.DecodeError:
+        return "ПАШЁЛ НАХУЙ ХАКЕР Я ТВАЮ МАМАШУ ЕБАЛ"
+    except jwt.exceptions.ExpiredSignatureError:
+        return "перелогинься, время вышло"
+    except:
+        return "Ошибка какая-то, бля хз"
+
+    result = await get_id(user_id, db)
+
+    return result
+
+async def service_add_item(item_name, db: AsyncSession = Depends(get_async_session)):
+    new_item = await create_item(item_name)
+    query = item_table.insert().values(**new_item.dict())
+
+    try:
+        inserted_item = await db.execute(query)
+    except IntegrityError:
+        return "такой предмет уже есть, ХУЕСОС"
+
+    await db.commit()
+
+    return f"Поздравляем, вы пополнили магазин, добавили {item_name} под id {inserted_item.inserted_primary_key}"
