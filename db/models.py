@@ -30,7 +30,7 @@ order_table = Table(
     metadata,
     Column("id", Integer, primary_key=True),
     Column("user_id", Integer, ForeignKey("user.id"), index=True ,nullable=False),
-    Column("item_id", Integer, nullable=False),
+    Column("item_id", Integer, ForeignKey("item.id"), nullable=False),
     Column("quantity", Integer, nullable=False)
 )
 

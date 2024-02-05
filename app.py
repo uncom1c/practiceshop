@@ -20,7 +20,7 @@ from api.router import router as api_router
 async def lifespan(app: FastAPI):
     
     #
-    # await create_tables()
+    await create_tables()
     
     yield
 

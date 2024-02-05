@@ -4,10 +4,10 @@ services:
   storage-users-postgres:
     image: postgres
     ports:
-      - 5433:5432
+      - ${POSTGRES_PORT}:5432
     environment:
       - POSTGRES_HOST=localhost
-      - POSTGRES_PORT=5433
+      - POSTGRES_PORT=${POSTGRES_PORT}
       - POSTGRES_USER=myusername
       - POSTGRES_PASSWORD=mypassword
       - POSTGRES_DB=grishachertila
@@ -16,4 +16,4 @@ services:
 
 volumes:
   postgres-grishachertila:
-    external: false
+    external: false 
