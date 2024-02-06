@@ -1,6 +1,6 @@
 from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, status
-from db.schemas import (
+from .schemas import (
     buy_form,
     user_base,
 )

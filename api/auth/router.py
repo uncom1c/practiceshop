@@ -3,7 +3,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from psycopg2 import IntegrityError
-from db.schemas import (
+from .schemas import (
     UserCreate,
     Token,
     user_base,

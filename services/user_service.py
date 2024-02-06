@@ -4,7 +4,7 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError
 import jwt
-from db.schemas import (
+from .schemas import (
     Item_addDB,
     Token,
     UserCreate,
@@ -18,7 +18,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from db.models import user_table, item_table, order_table
 from config import JWT_ALGORITHM, JWT_SECRET, ACCESS_TOKEN_EXPIRE_MINUTES
 from passlib.context import CryptContext
-from sqlalchemy.exc import *  
+from sqlalchemy.exc import *    # noqa: F403
 import random
 
 # from api.dependencies import *
@@ -187,7 +187,7 @@ async def service_getuser_by_jwt(jwt_token, db: AsyncSession = Depends(get_async
         return "ПАШЁЛ НАХУЙ ХАКЕР Я ТВАЮ МАМАШУ ЕБАЛ"
     except jwt.exceptions.ExpiredSignatureError:
         return "перелогинься, время вышло"
-    except:
+    except:  # noqa: E722
         return "Ошибка какая-то, бля хз"
 
     result = await get_id(user_id, db)
@@ -200,7 +200,7 @@ async def service_add_item(item_name, db: AsyncSession = Depends(get_async_sessi
 
     try:
         inserted_item = await db.execute(query)
-    except IntegrityError:
+    except IntegrityError:  # noqa: F405
         return "такой предмет уже есть, ХУЕСОС"
 
     await db.commit()

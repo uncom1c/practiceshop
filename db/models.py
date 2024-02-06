@@ -1,6 +1,6 @@
-from sqlalchemy import MetaData, Integer, String, TIMESTAMP, ForeignKey, Table, Column, JSON, Boolean, PickleType
+from sqlalchemy import Integer, String, ForeignKey, Table, Column
 
-from datetime import date, datetime, timedelta
+
 from .base import metadata
 
 
