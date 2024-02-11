@@ -30,9 +30,12 @@ class user_base(BaseModel):
     email: EmailStr
     username: str
     money: int
-    bought: dict
+    is_superuser: bool    
 
 class buy_order(BaseModel):
     user_id: int
     item_id: int
     quantity: int
+
+class create_role(BaseModel):
+    superuser: bool

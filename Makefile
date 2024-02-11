@@ -18,4 +18,9 @@ revision-migrate:
 migrate:
 	.\venv\Scripts\alembic.exe upgrade head
 
-.PHONY: install sync start init-migrate revision-migrate migrate
+test:
+    PYTHONPATH=.pytest
+
+
+.PHONY: install sync start init-migrate revision-migrate migrate test
+

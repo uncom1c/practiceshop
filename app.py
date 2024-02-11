@@ -1,9 +1,9 @@
 from contextlib import asynccontextmanager
 from fastapi import Depends, FastAPI
+from fastapi.testclient import TestClient
 # from auth.auth import auth_backend
 import uvicorn
-from db.base import metadata
-from db.database import engine
+
 # from auth.database import User
 # from auth.manager import get_user_manager
 
@@ -11,6 +11,8 @@ from db.database import engine
 
 import os
 
+from db.base import metadata
+from db.database import engine
 
 from api.router import router as api_router
 from api.auth.router import router as auth_router
@@ -46,6 +48,8 @@ app = FastAPI(lifespan=lifespan)
 
 
 app.include_router(router=api_router)
-app.include_router(router=auth_router,  prefix="/auth" , tags=["auth"])
+app.include_router(router=auth_router, tags=["auth"])
 app.include_router(router=search_router,prefix="/search" , tags=["search"])
 app.include_router(router=shop_router,  prefix="/shop" ,  tags=["shop"])
+
+

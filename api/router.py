@@ -29,17 +29,6 @@ router = APIRouter()
 
 
 
-
-
-
-
-
-
-
-
-
-
-
 @router.get("/zalupa")
 async def zalupa_handler():
     return "hello world"

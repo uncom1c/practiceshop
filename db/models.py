@@ -1,8 +1,26 @@
-from sqlalchemy import Integer, String, ForeignKey, Table, Column
+from sqlalchemy import Integer, String, ForeignKey, Table, Column, Boolean
 
 
 from .base import metadata
 
+
+
+order_table = Table(
+    "order",
+    metadata,
+    Column("id", Integer, primary_key=True),
+    Column("user_id", Integer, ForeignKey("user.id"), index=True ,nullable=False),
+    Column("item_id", Integer, ForeignKey("item.id"), nullable=False),
+    Column("quantity", Integer, nullable=False)
+)
+
+# roles_table = Table(
+#     "roles",
+#     metadata,
+#     Column("id", Integer, ForeignKey("user.id"), index=True, primary_key=True),
+#     Column("superuser", Boolean, nullable=False),
+    
+# )
 
 item_table = Table(
     "item",
@@ -23,15 +41,7 @@ user_table = Table(
     Column("username", String, index=True, unique=True, nullable=False),
     Column("password", String, nullable=False),
     Column("money", Integer, default=1000 ),
-)
-
-order_table = Table(
-    "order",
-    metadata,
-    Column("id", Integer, primary_key=True),
-    Column("user_id", Integer, ForeignKey("user.id"), index=True ,nullable=False),
-    Column("item_id", Integer, ForeignKey("item.id"), nullable=False),
-    Column("quantity", Integer, nullable=False)
+    Column("is_superuser", Boolean, default=0)
 )
 
 # class UserManager():

@@ -11,7 +11,8 @@ from .schemas import (
     TokenData,
     buy_form,
     user_base,
-    buy_order
+    buy_order,
+    create_role
 )
 from db.database import get_async_session
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -20,12 +21,13 @@ from config import JWT_ALGORITHM, JWT_SECRET, ACCESS_TOKEN_EXPIRE_MINUTES
 from passlib.context import CryptContext
 from sqlalchemy.exc import *    # noqa: F403
 import random
+from psycopg2 import IntegrityError
+
 
 # from api.dependencies import *
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
@@ -42,6 +44,8 @@ def encode_user(user: UserCreate):
         password=get_password_hash(user.password),
     )
 
+async def assign_role():
+    return create_role(superuser= 1)
 
 async def get_username(username, db: AsyncSession):
     query = user_table.select().where(user_table.c.username == username)
@@ -103,27 +107,7 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
     return encoded_jwt
 
 
-async def get_current_user(
-    token: Annotated[str, Depends(oauth2_scheme)],
-    db: AsyncSession = Depends(get_async_session),
-):
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
-    try:
-        payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
-        username: str = payload.get("sub")
-        if username is None:
-            raise credentials_exception
-        token_data = TokenData(username=username)
-    except JWTError:
-        raise credentials_exception
-    user = await get_username(token_data.username, db)
-    if user is None:
-        raise credentials_exception
-    return user
+
 
 
 
@@ -161,6 +145,7 @@ async def service_login_for_access_token(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     db: AsyncSession = Depends(get_async_session),
 ) -> Token:
+    print(1)
     result = await get_username(form_data.username, db)
 
     if not result:
@@ -194,7 +179,9 @@ async def service_getuser_by_jwt(jwt_token, db: AsyncSession = Depends(get_async
 
     return result
 
-async def service_add_item(item_name, db: AsyncSession = Depends(get_async_session)):
+async def service_add_item(item_name, user: user_base, db: AsyncSession = Depends(get_async_session)):
+    if not user.is_superuser:
+        return "Ну але ты не админ ты лох лох"
     new_item = await create_item(item_name)
     query = item_table.insert().values(**new_item.dict())
 
@@ -206,3 +193,23 @@ async def service_add_item(item_name, db: AsyncSession = Depends(get_async_sessi
     await db.commit()
 
     return f"Поздравляем, вы пополнили магазин, добавили {item_name} под id {inserted_item.inserted_primary_key}"
+
+async def service_register_handler(
+    user_create: UserCreate, db: AsyncSession = Depends(get_async_session)
+):
+    print(user_create)
+    user_create = encode_user(user_create)
+    query = user_table.insert().values(**user_create.dict())
+
+    try:
+        inserted_user = await db.execute(query)
+    except:
+        return "такой пользователь уже есть, ХУЕСОС"
+
+    await db.commit()
+    # print(await assign_role())
+    
+    
+    return (
+        f"Поздравляем, вы зарегались, пользователь {inserted_user.inserted_primary_key}"
+    )
